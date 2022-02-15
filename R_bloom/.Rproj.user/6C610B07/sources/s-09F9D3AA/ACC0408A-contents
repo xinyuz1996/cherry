@@ -1,0 +1,26 @@
+---
+title: "Test_gml"
+Author: smallfishabc
+---
+Load library
+```{r}
+library(tidyverse)
+```
+
+Load data cleaned by Lezheng Fang
+```{r}
+climate_imputed<-read.table('../data/kyoto_climate_imputed.txt' ,sep=",", header=TRUE)
+climate_imputed$DATE = as.Date(climate_imputed$DATE )
+climate_imputed$doy = NULL
+str(climate_imputed)
+```
+Remove the redundant year column
+```{r}
+climate_imputed_new <- select(climate_imputed,-(year))
+str(climate_imputed_new)
+```
+Test glm function in R language.
+```{r}
+
+```
+
