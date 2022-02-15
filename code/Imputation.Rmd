@@ -49,6 +49,10 @@ missmap(climate)
   #saveRDS(climate_imputed,file = "climate_imputed.csv")
   
   write.table(climate_imputed,'../data/kyoto_climate_imputed.csv' ,sep=",", col.names = c(names(climate_imputed)), row.names = FALSE)
+  climate_imputed = read.table('../data/kyoto_climate_imputed.csv' ,sep=",", header=TRUE)
+  climate_imputed$DATE = as.Date(climate_imputed$DATE )
+  climate_imputed$doy = NULL
+  str(climate_imputed)
   #readRDS()
   
 ```
