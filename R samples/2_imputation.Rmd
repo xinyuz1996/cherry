@@ -1,0 +1,472 @@
+---
+title: "CodeReport ST841 TAA Project"
+author: "Andrew Hollis, Xinyu Zhang, and Qiang Heng"
+date: "10/26/2020"
+output:
+  html_document: default
+  pdf_document: default
+
+bibliography: references.bib
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr) # kable
+library(readr) # read_delim
+library(dplyr) # manipulate data
+library(Amelia) # missing value imputation
+library(Hmisc) #correlation matrix
+```
+
+## Introduction
+This document is meant to explain and demonstrate the implementation of all analysis performed on the TAA dataset.
+
+## Data Transformations
+We took the original data and performed several important transformations. 
+
+First we read in the initial data file:
+```{r}
+init_TAA_data<-read.delim("initial_data.txt")
+init_TAA_data$X3_firmSize <- as.numeric(init_TAA_data$Q26_num) # Insure Q26_num is actually numeric
+init_TAA_data$Q29_num<-as.numeric(as.character(init_TAA_data$Q29_num)) #Insure Q29_num is actually numeric
+```
+
+### Preview the missing value 
+
+```{r}
+missmap(init_TAA_data)
+```
+
+The above plot shows how the missing value is distributed among the data. The X-axis represent the variables that have missing value, and the y-axis shows the observation.
+
+For some observation such as 1, 2, and 5, we could see there are too much missing values, thus it might need further consideration that if we should include those data with most variables missing.
+
+For the variables from left to right, the missing proportion for each variable is decreasing, which need our further attention to select the proper variable for analysis.
+
+
+
+```{r,echo=FALSE}
+
+## TODO!!!
+# # Delete observations with too much missing value
+# null_observations = c(1, 2, 5)
+# init_TAA_data = init_TAA_data[-null_observations,]
+
+#Correct the Anamolous and Strange Data Mistake 
+prev=init_TAA_data[1,7:10]
+init_TAA_data[1,7:10]=init_TAA_data[68,7:10]
+for(i in 2:68){
+  temp=init_TAA_data[i,7:10]
+  init_TAA_data[i,7:10]=prev
+  prev=temp
+}
+```
+
+We then remove the variables that are not as interesting for analysis, and these include the data from Q42, Q43, Q44, and Q45 which are demographic data about the respondent. We will also compute new summary score for question 6 from the survey, so we remove this as well. 
+
+```{r}
+removal_list<-c("Q42","Q43","Q44","Q45","Q6_score")
+init_TAA_data<-init_TAA_data[, !(names(init_TAA_data) %in%removal_list)]
+```
+
+We also remove observations that are mostly missing. 
+```{r}
+init_TAA_data <- init_TAA_data[-c(64, 67, 68),]
+```
+### Dealing with Likert Scale Items (Drew)
+Questions 5, 10, 23, 30, 31, and 32 are composed of several 5-item Likert scale sub-questions. Each of these questions represents a single underlying conceptual variable. For instance, the 6 subquestions from question 5 together measure the extent to which a business considered various business objectives as they intially considered whether they would try TAA tools. We would like to create a one-dimensional measure that represents the level of this initial TAA consideration for a particular company. 
+
+Nonlinear principal components analysis is a methodology that allows us to transform several Likert scale items into the one-dimensional summary metric that captures the maximal amount of variability from the original data. [@linting2007nonlinear]
+
+Below, we use R to perform the nonlinear principal components analysis:
+
+```{r}
+library(Gifi)
+##Q5
+#Set Aside Data for initiation
+init_data_names<-c("Q5_1","Q5_2","Q5_3","Q5_4","Q5_5","Q5_6") 
+init_data<-init_TAA_data[init_data_names]
+
+#Code Missing Values
+init_data<-apply(init_data,2,function(x){ifelse(x==6,NA,x)}) 
+
+#Impute, transform, do PCA
+pca_init<-princals(init_data,ndim=1,missing = "a",degrees=2)
+init_score<-pca_init$objectscores[,1]
+
+##Q10
+#Set Aside Data for routinization
+rout_data_names<-c("Q10_1","Q10_2","Q10_3","Q10_4") 
+rout_data<-init_TAA_data[rout_data_names]
+
+#Code Missing Values
+rout_data<-apply(rout_data,2,function(x){ifelse(x==6,NA,x)}) 
+
+#Impute, transform, do PCA
+pca_rout<-princals(rout_data,ndim=1,missing = "a",degrees=2)
+rout_score<-pca_rout$objectscores[,1]
+
+##Q23
+#Set Aside Data for routinization
+integ_data_names<-c("Q23_1","Q23_2") 
+integ_data<-init_TAA_data[integ_data_names]
+
+#Code Missing Values
+integ_data<-apply(integ_data,2,function(x){ifelse(x==6,NA,x)}) 
+
+#Impute, transform, do PCA
+pca_integ<-princals(integ_data,ndim=1,missing = "a",degrees=2)
+integ_score<-pca_integ$objectscores[,1]
+
+##Q30
+#Set Aside Data for management obstacles
+manag_data_names<-c("Q30_1","Q30_2","Q30_3","Q30_4") 
+manag_data<-init_TAA_data[manag_data_names]
+
+#Code Missing Values
+manag_data<-apply(manag_data,2,function(x){ifelse(x==6,NA,x)}) 
+
+#Impute, transform, do PCA
+pca_manag<-princals(manag_data,ndim=1,missing = "a",degrees=2)
+manag_score<-pca_manag$objectscores[,1]
+
+##Q31
+#Set Aside Data for management obstacles
+comp_data_names<-c("Q31_1","Q31_2","Q31_3") 
+comp_data<-init_TAA_data[comp_data_names]
+
+#Code Missing Values
+comp_data<-apply(comp_data,2,function(x){ifelse(x==6,NA,x)}) 
+
+#Impute, transform, do PCA
+pca_comp<-princals(comp_data,ndim=1,missing = "a",degrees=2)
+comp_score<-pca_comp$objectscores[,1]
+
+##Q32
+#Set Aside Data for Government Regulation
+gov_data_names<-c("Q32_1","Q32_2","Q32_3","Q32_4") 
+gov_data<-init_TAA_data[gov_data_names]
+
+#Code Missing Values
+gov_data<-apply(gov_data,2,function(x){ifelse(x==6,NA,x)}) 
+
+#Impute, transform, do PCA
+pca_gov<-princals(gov_data,ndim=1,missing = "a",degrees=2)
+gov_score<-pca_gov$objectscores[,1]
+
+#Add Nonlinear PCA Scores to data
+init_TAA_data$init_composite<-init_score
+init_TAA_data$rout_composite<-rout_score
+init_TAA_data$integrate_composite<-integ_score
+init_TAA_data$manag_composite<-manag_score
+init_TAA_data$comp_composite<-comp_score
+init_TAA_data$gov_composite<-gov_score
+str(init_TAA_data)
+#Create Loadings Plots
+par(mfrow=c(2,3))
+barplot(pca_init$loadings[,1],main="Initiation Composite")
+barplot(pca_rout$loadings[,1],main="Routinization Composite")
+barplot(pca_integ$loadings[,1],main="Tech Integration Composite")
+barplot(pca_manag$loadings[,1],main="Management Obstacles Composite")
+barplot(pca_comp$loadings[,1],main="Competition Composite")
+barplot(pca_gov$loadings[,1],main="Regulatory Environment Composite")
+
+#Remove Original Likert Scale Data
+removal_list<-c("Q5_1","Q5_2","Q5_3","Q5_4","Q5_5","Q5_6","Q10_1","Q10_2","Q10_3","Q10_4","Q23_1","Q23_2","Q30_1","Q30_2","Q30_3","Q30_4","Q31_1","Q31_2","Q31_3","Q32_1","Q32_2","Q32_3","Q32_4")
+init_TAA_data<-init_TAA_data[, !(names(init_TAA_data) %in%removal_list)]
+```
+
+
+### Combining Weighted Variables (Drew)
+Q6 and Q22 have survey respondents check several boxes to indicate the level of TAA technology they have adopted and the specific types of TAA they adopted. For Q6, if respondents check the first box, they have adopted emerging TAA technology, if they check the second box they have adopted intermediate TAA technology, and if they check the third box they have adopted advanced TAA technology. We assign a weight of 1 to checkbox 1, 2 to checkbox 2, and 3 to checkbox 3. We create the single adoption score for each company by adding the weights and dividing by the maximum possible cumulative weight, 6. 
+
+
+Similarly, for Q22, if a weight of 0 is assigned to the first box, 1 to the second box, 2 for the 3rd, 4th, 5th, and 10th boxes, 3 for the 6th box, 4 for the 7th box, and 5 for the 8th and 9th boxes. As with the Q6 response, we form a single score by adding the weights and dividing by the maximum potential score, 26.
+
+We standardize both new scores to have zero meana and standard deviation of 1. 
+
+We carry out this weighting in R below:
+
+```{r}
+#Transform 4's
+init_TAA_data[2,3]=3
+init_TAA_data[16,1]=1
+
+#Form Adoption Score
+adopt_data<-init_TAA_data[c("Q6box_1","Q6box_2","Q6box_3")]
+adopt_comp<-apply(adopt_data,1,sum,na.rm=TRUE)/6
+init_TAA_data$adoption_score<-adopt_comp
+init_TAA_data$adoption_score<-scale(init_TAA_data$adoption_score)
+
+#Technology Readiness/Capability Score
+TAA_capability_data<-init_TAA_data[c("Q22_box1","Q22_box2","Q22_box3","Q22_box4","Q22_box5","Q22_box6","Q22_box7","Q22_box8","Q22_box9", "Q22_box10")]
+
+TAA_capability_score<-rep(0,nrow(TAA_capability_data))
+max_score=1+2*4+3+4+5*2
+for(i in 1:length(TAA_capability_score)){
+  score=0
+  if(!is.na(TAA_capability_data[i,1])){
+    score=score+0
+  }
+  if(!is.na(TAA_capability_data[i,2])){
+    score=score+1
+  }
+  if(!is.na(TAA_capability_data[i,3])){
+    score=score+2
+  }
+  if(!is.na(TAA_capability_data[i,4])){
+    score=score+2
+  }
+  if(!is.na(TAA_capability_data[i,5])){
+    score=score+2
+  }
+  if(!is.na(TAA_capability_data[i,6])){
+    score=score+3
+  }
+  if(!is.na(TAA_capability_data[i,7])){
+    score=score+4
+  }
+  if(!is.na(TAA_capability_data[i,8])){
+    score=score+5
+  }
+  if(!is.na(TAA_capability_data[i,9])){
+    score=score+5
+  }
+  if(!is.na(TAA_capability_data[i,10])){
+    score=score+2
+  }
+  TAA_capability_score[i]=score/max_score
+}
+init_TAA_data$TAA_capability<-TAA_capability_score
+init_TAA_data$TAA_capability<-scale(init_TAA_data$TAA_capability)
+```
+
+### Creating Binary Variable for Q24
+Q24 measures the global extent of a company. We transform this variable into a binary variable that is 0 if the company only has domestic offices and 1 if the company has foreign offices.
+
+```{r}
+dom_int_data<-init_TAA_data[c("Q24_box1","Q24_box2","Q24_box3","Q24_box4")]
+dom_int<-ifelse(is.na(dom_int_data[,4]),0,1) #Create binary variable
+init_TAA_data$Domestic_International<-dom_int
+NA_index=apply(is.na(init_TAA_data[c("Q24_box1","Q24_box2","Q24_box3","Q24_box4")]),1,all) #Determine which values are missing
+init_TAA_data$Domestic_International[NA_index] = NA #Assign missingness pattern
+```
+
+### Data Imputation (Xinyu)
+
+**Here, the data is renamed to prepare for the future analysis with a clearer variable**
+
+```{r}
+# names(init_TAA_data)
+TAA_data<-init_TAA_data[,32:41]
+oldnames <- names(TAA_data)
+newnames <- c("X3_firmSize" , "Y1_initialization", "Y3_routinization", "X2_integration", "X5_manag", "X6_compete", "X7_gov", "Y2_adoption", "X1_readiness", "X4_global" )
+names(TAA_data) <- newnames
+rbind(oldnames, newnames)
+```
+
+Using str(), we can see how many observations and how many variables are there in the data set.
+```{r}
+TAA_data$X4_global <- as.factor(TAA_data$X4_global)
+str(TAA_data)
+```
+
+In this data set, we have three response variables (dependent variable), named as $Y_1$,$Y_2$, and $Y_3$, while other seven predictors (independent variable) named as $X_1, \cdots, X_7$. There are 65 observations since three of them have too much missing value and has been ignored for the following analysis.
+
+
+```{r}
+missmap(TAA_data)
+```
+
+
+### Missing Value imputation in Amelia
+
+Here the log transformation has been applied to the X3_firmSize since the range for the firm size is too large, and a log transformation would help to suppress the extreme large value of this variable.
+
+```{r}
+boxplot(TAA_data$X3_firmSize, main="Boxplot for X3_firmSize", horizontal=T)
+```
+
+Besides, since the global size is a categorical variable (nominal variable), we want to specify this in the following function.
+
+```{r}
+m = 5 # number of simulated datsets to create # See definition of m in ?amelia()
+TAA_data_amelia <- amelia(x = TAA_data, logs="X3_firmSize", noms="X4_global", m = m) # 
+str(TAA_data_amelia$imputations$imp1)
+
+TAA_data_impute <- TAA_data
+# Average the imputations between different simulated datasets
+col_index = which(names(TAA_data_amelia$imputations$imp1) %in% c("X3_firmSize", "X4_global"))
+for( col in col_index){
+  temp=numeric()
+  for (i in 1:m){
+    temp = cbind(temp, TAA_data_amelia$imputations[[i]][,col])
+  }
+  TAA_data_impute[,col] = apply(temp, 1, mean)
+}
+
+TAA_data_impute$X4_global <- round((TAA_data_impute$X4_global))
+```
+
+
+```{r}
+missmap(TAA_data_impute)
+```
+
+Now we can see there are no missing values in the data set, and the further regression analysis can be done.
+
+Let's look at the summary of the missing value imputations.
+```{r}
+summary(TAA_data_impute)
+```
+
+
+
+```{r}
+par(mfrow=c(2,1), mar=c(2, 3, 2, 3))
+X4_orig <- table(as.character(TAA_data$X4_global), useNA = "ifany")
+X4_impute <- c(table(TAA_data_impute$X4_global), 0)
+rbind(X4_orig, X4_impute)
+
+par(mfrow=c(2,1), mar=c(2, 3, 2, 3))
+compare.density(TAA_data_amelia, var="X3_firmSize")
+```
+
+
+Hence, the TAA_data_impute or TAA_data_scale can be applied to the following analysis
+
+```{r}
+# 1. log transformation of firmSize
+TAA_data_impute$X3_firmSize <- log(TAA_data_impute$X3_firmSize)
+# 2. Make global a binary variable
+TAA_data_impute$X4_global <- as.factor(TAA_data_impute$X4_global)
+```
+
+### Multivariate Regression Analysis (Qiang)
+First we want to calculate the correlation matrix of all the variables. Notice that global scale is a binary variable and the correlation between it and other variables does not mean much. We choose to include it just in case you need it anyway. The first following matrix is the correlation matrix, while the second is the corresponding p values for those correlations.
+```{r}
+#permute the columns of the data
+TAA_data_final <- TAA_data_impute[,c(9,4,1,10,5,6,7,2,8,3)]
+#calculate and print the correlation matrix 
+rcorr(as.matrix(TAA_data_final))
+```
+Now let's conduct MANOVA to investigate whether each independent variable has a significant impact on all three response variables. These are essentially  likelihood ratio tests to determine whether a reduced model (without a certain independent variable) will be sufficient when compared against the full model. MANOVA is insightful in the sense that it takes potential correlation between response variables into consideration, which is something simple linear regression does not address.
+```{r}
+#extract Y and X from the dataframe
+Y <- TAA_data_final[,8:10]
+X <- TAA_data_final[,1:7]
+X[,4] <- as.numeric(X[,4])
+
+#standardize Y and X so that the intercept is excluded from the regression model
+#after scaling the regression coefficients will be comparable in scale
+Y_scaled <- scale(Y)
+X_scaled <- data.frame(scale(X))
+fullmodel <- lm(Y_scaled~-1+.,data=X_scaled)
+modelwithoutX1 <- lm(Y_scaled~.-1-X1_readiness,data=X_scaled)
+modelwithoutX2 <- lm(Y_scaled~.-1-X2_integration,data=X_scaled)
+modelwithoutX3 <- lm(Y_scaled~.-1-X3_firmSize,data=X_scaled)
+modelwithoutX4 <- lm(Y_scaled~.-1-X4_global,data=X_scaled)
+modelwithoutX5 <- lm(Y_scaled~.-1-X5_manag,data=X_scaled)
+modelwithoutX6 <- lm(Y_scaled~.-1-X6_compete,data=X_scaled)
+modelwithoutX7 <- lm(Y_scaled~.-1-X7_gov,data=X_scaled)
+
+#calculate the likelihood ratio statistics for X1
+anova(fullmodel, modelwithoutX1, test="Wilks")
+anova(fullmodel, modelwithoutX1, test="Pillai")
+anova(fullmodel, modelwithoutX1, test="Hotelling-Lawley")
+anova(fullmodel, modelwithoutX1, test="Roy")
+
+#calculate the likelihood ratio statistics for X2
+anova(fullmodel, modelwithoutX2, test="Wilks")
+anova(fullmodel, modelwithoutX2, test="Pillai")
+anova(fullmodel, modelwithoutX2, test="Hotelling-Lawley")
+anova(fullmodel, modelwithoutX2, test="Roy")
+
+#calculate the likelihood ratio statistics for X3
+anova(fullmodel, modelwithoutX3, test="Wilks")
+anova(fullmodel, modelwithoutX3, test="Pillai")
+anova(fullmodel, modelwithoutX3, test="Hotelling-Lawley")
+anova(fullmodel, modelwithoutX3, test="Roy")
+
+#calculate the likelihood ratio statistics for X4
+anova(fullmodel, modelwithoutX4, test="Wilks")
+anova(fullmodel, modelwithoutX4, test="Pillai")
+anova(fullmodel, modelwithoutX4, test="Hotelling-Lawley")
+anova(fullmodel, modelwithoutX4, test="Roy")
+
+#calculate the likelihood ratio statistics for X5
+anova(fullmodel, modelwithoutX5, test="Wilks")
+anova(fullmodel, modelwithoutX5, test="Pillai")
+anova(fullmodel, modelwithoutX5, test="Hotelling-Lawley")
+anova(fullmodel, modelwithoutX5, test="Roy")
+
+#calculate the likelihood ratio statistics for X6
+anova(fullmodel, modelwithoutX6, test="Wilks")
+anova(fullmodel, modelwithoutX6, test="Pillai")
+anova(fullmodel, modelwithoutX6, test="Hotelling-Lawley")
+anova(fullmodel, modelwithoutX6, test="Roy")
+
+#calculate the likelihood ratio statistics for X7
+anova(fullmodel, modelwithoutX7, test="Wilks")
+anova(fullmodel, modelwithoutX7, test="Pillai")
+anova(fullmodel, modelwithoutX7, test="Hotelling-Lawley")
+anova(fullmodel, modelwithoutX7, test="Roy")
+```
+We can see that X1_readiness, X2_integration and X4_firmsize have a significant overall impact on the response variables. To see exactly which response variables these explanatory variables significantly influences, we pull out the individual regression tables for each response variable.
+```{r}
+modelsummary <- summary(fullmodel)
+modelsummary[[1]]
+modelsummary[[2]]
+modelsummary[[3]]
+```
+We can see that X4_global is significant for initiation, X1_readiness is significant for adoption while X2_integration is significant for routinization. However, significant coefficients are relatively rare(namely one for each response variable).
+
+### Regression Trees (Drew)
+```{r}
+library(rpart)
+library(rpart.plot)
+```
+
+We present regression trees as an alternative analysis to the linear regression models. Regression trees are robust to lack of normality, outliers, and missing values which are problems that weaken the validity of the linear regression models. 
+
+We start with a regression tree model for the initiation variable. 
+
+```{r}
+tree_mod_init<-rpart(Y1_initialization~X3_firmSize+X2_integration+X5_manag+
+                        X6_compete+X7_gov+X1_readiness+X4_global, 
+                      data=TAA_data_final, method="anova",control=list(minsplit=5,cp=0.01))
+rpart.plot(tree_mod_init)
+```
+
+The cp parameter controls the complexity (depth of the tree) for higher values of cp, we get a smaller tree with fewer branches. In each node of the tree, the first number is the mean response in that node and the second number is the percentage of observations in that node. 
+
+For example, the first right split contains 82% of the data, i.e. 82% of the firms have a global presence, and the mean intiation response for these firms with global presence is 0.2. 
+
+Typically, the first splitting variable is interpreted as the most important. Thus, the regression tree seems to indicate that the whether or not a firm has global reach is the most important factor in determining the level of consideration they initially give to employing TAA tools. 
+
+Next we consider a regression tree for the adoption response. 
+```{r}
+
+tree_mod_adopt<-rpart(Y2_adoption~X3_firmSize+X2_integration+X5_manag+
+                       X6_compete+X7_gov+X1_readiness+X4_global, 
+                     data=TAA_data_final, method="anova",control=list(minsplit=5,cp=0.028310))
+rpart.plot(tree_mod_adopt)
+```
+
+The first splitting variable here is technological readiness. Thus, the level of TAA adoption a firm achieves is most impacted by the firm's level of technological readiness.
+
+Finally, we consider a regression tree for the routinziation response:
+
+```{r}
+tree_mod_rout<-rpart(Y3_routinization~X3_firmSize+X2_integration+X5_manag+
+                       X6_compete+X7_gov+X1_readiness+X4_global, 
+                     data=TAA_data_final, method="anova",control=list(minsplit=5,cp=0.025))
+rpart.plot(tree_mod_rout)
+```
+
+In this tree, the first splitting variable is technological integration. Thus, the most important variable that impacts the level of a firm's TAA routinization seems to be the firm's level of technological integration. 
+
+
+
+
+
