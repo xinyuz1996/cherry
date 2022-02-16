@@ -47,6 +47,22 @@ Add freezing day data
 ```{r}
 #climate_imputed_new$degree_day = cut(clmate_imputed_new$average_temperature,c(2.5,9.2,12.5,16,18))
 ```
+
+CDD day
+```{r}
+#bloom_test%>%
+  #group_by(year) %>% # group by the day column
+  #summarise(CDD=sum(average_temperature))
+#all_year <- unique(bloom_test$year)
+#for (i in all_year){
+  # (k in filter(bloom_test year == i))
+#    
+#}
+bloom_test<-mutate(group_by(bloom_test,year), CDD=cumsum(average_temperature))
+  
+  
+```
+
 Quick Linear regression
 ```{r}
 bloom_test<-bloom_test %>% drop_na()
@@ -54,25 +70,24 @@ bloom_test %>%filter(DATE >= as.Date('2019-01-01') & DATE <= as.Date('2022-01-01
     group_by(year) %>%
     plot_time_series_regression(
         .date_var     = DATE,
-        .formula      = as.numeric(Status) ~ as.numeric(average_temperature),
+        .formula      = as.numeric(Status) ~ as.numeric(CDD)-800,
         .facet_ncol   = 2,
         .interactive  = FALSE,
         .show_summary = FALSE
     )
 ```
-CDD day
 ```{r}
-bloom_test%>%
-  group_by(year) %>% # group by the day column
-  summarise(CDD=sum(average_temperature))
+glm(Status ~ CDD, family=binomial(link="logit"), data=bloom_test)
 ```
 
 
 Test split function in R language.
 ```{r}
 splits <- bloom_test %>%
-  time_series_split(assess = "3 months", cumulative = TRUE)
-
+  time_series_split(assess = "1 year", cumulative = TRUE)
+library(recipes)
+recipe_spec_timeseries <- recipe(value ~ ., data = training(splits)) %>%
+    step_timeseries_signature(date) 
 #resample_spec <- time_series_cv(data = climate_imputed_new,
 #                                initial     = "10 years",
 #                                assess      = "12 months",
