@@ -5,7 +5,7 @@ Author: smallfishabc
 Load library
 ```{r}
 library(tidyverse)
-library(timetk)
+# library(timetk)
 ```
 
 Load data cleaned by Lezheng Fang
@@ -35,11 +35,11 @@ bloom_test<-mutate(bloom_test,Status = case_when(
     DATE>=bloom_date ~ 1,
     DATE<bloom_date ~ 0
     )) 
-bloom_test%>%filter(DATE >= as.Date('2019-01-01') & DATE <= as.Date('2022-01-01')) %>%
-    group_by(year) %>%
-    plot_time_series(
-        DATE, average_temperature,
-        .interactive = FALSE)
+# bloom_test%>%filter(DATE >= as.Date('2019-01-01') & DATE <= as.Date('2022-01-01')) %>%
+#     group_by(year) %>%
+#     plot_time_series(
+#         DATE, average_temperature,
+#         .interactive = FALSE)
 #bloom_test$Status# = as.numeric(bloom_result$Status)
 ```
 
@@ -59,25 +59,30 @@ CDD day
 #    
 #}
 bloom_test<-mutate(group_by(bloom_test,year), CDD=cumsum(average_temperature))
-  
-  
+str(bloom_test)
+# bloom_test$doy = as.Date(bloom_test$DATE)
 ```
 
 Quick Linear regression
 ```{r}
 bloom_test<-bloom_test %>% drop_na()
-bloom_test %>%filter(DATE >= as.Date('2019-01-01') & DATE <= as.Date('2022-01-01')) %>%
-    group_by(year) %>%
-    plot_time_series_regression(
-        .date_var     = DATE,
-        .formula      = as.numeric(Status) ~ as.numeric(CDD)-800,
-        .facet_ncol   = 2,
-        .interactive  = FALSE,
-        .show_summary = FALSE
-    )
+# bloom_test %>%filter(DATE >= as.Date('2019-01-01') & DATE <= as.Date('2022-01-01')) %>%
+#     group_by(year) %>%
+#     plot_time_series_regression(
+#         .date_var     = DATE,
+#         .formula      = as.numeric(Status) ~ as.numeric(CDD)-800,
+#         .facet_ncol   = 2,
+#         .interactive  = FALSE,
+#         .show_summary = FALSE
+#     )
 ```
 ```{r}
-glm(Status ~ CDD, family=binomial(link="logit"), data=bloom_test)
+l0 = glm(Status ~ CDD + bloom_doy, family=binomial(link="logit"), data=bloom_test)
+summary(l0)
+
+newdat = data.frame(CDD=100, bloom_doy=18)
+predict(l0, newdat, type="response") #pt
+predict(l0, newdat) #logit(pt)
 ```
 
 
