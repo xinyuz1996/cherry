@@ -1,0 +1,98 @@
+---
+title: "Test_gml"
+Author: smallfishabc
+---
+Load library
+```{r}
+library(tidyverse)
+library(timetk)
+```
+
+Load data cleaned by Lezheng Fang
+```{r}
+climate_imputed<-read.table('../data/kyoto_climate_imputed.txt' ,sep=",", header=TRUE)
+climate_imputed$DATE = as.Date(climate_imputed$DATE )
+climate_imputed$doy = NULL
+str(climate_imputed)
+```
+Remove the redundant year column
+```{r}
+#climate_imputed_new <- select(climate_imputed,-(year))
+#str(climate_imputed_new)
+ggplot(data=climate_imputed_new, aes(x = DATE, y = average_temperature)) +
+      geom_point() +
+      labs(title = "average_temp_kyoto")
+# This line maybe used to filter the data
+#precip_boulder_AugOct <- boulder_daily_precip %>%
+#                        filter(DATE >= as.Date('2013-08-15') & DATE <= as.Date('2013-10-15'))
+```
+Add validation_data
+```{r}
+bloom_result<-read.table('../data/kyoto.csv' ,sep=",", header=TRUE)
+bloom_result$bloom_date = as.Date(bloom_result$bloom_date)
+bloom_test=bloom_result %>% right_join(climate_imputed,by="year")
+bloom_test<-mutate(bloom_test,Status = case_when(
+    DATE>=bloom_date ~ 1,
+    DATE<bloom_date ~ 0
+    )) 
+bloom_test%>%filter(DATE >= as.Date('2019-01-01') & DATE <= as.Date('2022-01-01')) %>%
+    group_by(year) %>%
+    plot_time_series(
+        DATE, average_temperature,
+        .interactive = FALSE)
+#bloom_test$Status# = as.numeric(bloom_result$Status)
+```
+
+Add freezing day data
+```{r}
+#climate_imputed_new$degree_day = cut(clmate_imputed_new$average_temperature,c(2.5,9.2,12.5,16,18))
+```
+
+CDD day
+```{r}
+#bloom_test%>%
+  #group_by(year) %>% # group by the day column
+  #summarise(CDD=sum(average_temperature))
+#all_year <- unique(bloom_test$year)
+#for (i in all_year){
+  # (k in filter(bloom_test year == i))
+#    
+#}
+bloom_test<-mutate(group_by(bloom_test,year), CDD=cumsum(average_temperature))
+  
+  
+```
+
+Quick Linear regression
+```{r}
+bloom_test<-bloom_test %>% drop_na()
+bloom_test %>%filter(DATE >= as.Date('2019-01-01') & DATE <= as.Date('2022-01-01')) %>%
+    group_by(year) %>%
+    plot_time_series_regression(
+        .date_var     = DATE,
+        .formula      = as.numeric(Status) ~ as.numeric(CDD)-800,
+        .facet_ncol   = 2,
+        .interactive  = FALSE,
+        .show_summary = FALSE
+    )
+```
+```{r}
+glm(Status ~ CDD, family=binomial(link="logit"), data=bloom_test)
+```
+
+
+Test split function in R language.
+```{r}
+splits <- bloom_test %>%
+  time_series_split(assess = "1 year", cumulative = TRUE)
+library(recipes)
+recipe_spec_timeseries <- recipe(value ~ ., data = training(splits)) %>%
+    step_timeseries_signature(date) 
+#resample_spec <- time_series_cv(data = climate_imputed_new,
+#                                initial     = "10 years",
+#                                assess      = "12 months",
+#                                cumulative  = FALSE,)
+#resample_spec
+#resample_spec %>% tk_time_series_cv_plan()
+```
+
