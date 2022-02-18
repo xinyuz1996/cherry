@@ -16,17 +16,6 @@ climate_imputed$DATE = as.Date(climate_imputed$DATE )
 climate_imputed$doy = yday(climate_imputed$DATE)
 str(climate_imputed)
 ```
-Remove the redundant year column
-```{r}
-#climate_imputed_new <- select(climate_imputed,-(year))
-#str(climate_imputed_new)
-ggplot(data=climate_imputed_new, aes(x = DATE, y = average_temperature)) +
-      geom_point() +
-      labs(title = "average_temp_kyoto")
-# This line maybe used to filter the data
-#precip_boulder_AugOct <- boulder_daily_precip %>%
-#                        filter(DATE >= as.Date('2013-08-15') & DATE <= as.Date('2013-10-15'))
-```
 Add validation_data
 ```{r}
 bloom_result<-read.table('../data/kyoto.csv' ,sep=",", header=TRUE)
@@ -46,25 +35,27 @@ Add freezing day data
 
 CDD day
 ```{r}
-#bloom_test%>%
-  #group_by(year) %>% # group by the day column
-  #summarise(CDD=sum(average_temperature))
-#all_year <- unique(bloom_test$year)
-#for (i in all_year){
-  # (k in filter(bloom_test year == i))
-#    
-#}
+
 bloom_test<-mutate(group_by(bloom_test,year), CDD=cumsum(average_temperature))
   
   
 ```
 
-Quick Linear regression
 ```{r}
+bloom_test%>%filter(DATE >= as.Date('2021-01-01') & DATE <= as.Date('2021-12-31'))->bloom_2020
+```
+
+
+General linear model
 
 ```{r}
-l0<-glm(Status ~ CDD, family=binomial(link="logit"), data=bloom_test)
+l0<-glm(Status ~ CDD+doy, family=binomial(link="logit"), data=bloom_test)
 summary(l0)
+x_axis<-data.frame(bloom_2020$CDD,bloom_2020$doy)
+predict(l0,bloom_2020,type='response')
+```
+```{r}
+
 ```
 
 

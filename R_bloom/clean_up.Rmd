@@ -30,3 +30,10 @@ bloom_test<-mutate(bloom_test,Status = case_when(
     )) 
 #bloom_test$Status# = as.numeric(bloom_result$Status)
 ```
+CDD day
+```{r}
+
+bloom_test<-mutate(group_by(bloom_test,year), CDD=cumsum(average_temperature))
+  
+  
+```
