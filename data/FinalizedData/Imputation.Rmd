@@ -1,0 +1,74 @@
+---
+title: "FirstRun"
+author: "Lezheng Fang"
+date: "2/13/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+## Read Climate and Cherry Blossom Data
+```{r DataReading}
+library(Amelia)
+
+climate_name = "../SimplifiedData/Kyoto_climate.csv"
+blossom_name = "../SimplifiedData/Kyoto_blossom.csv"
+
+climate <- read.csv(climate_name)
+blossom <- read.csv(blossom_name)
+summary(blossom)
+str(blossom)
+summary(climate)
+str(climate)
+missmap(climate)
+```
+
+## Impute Missing data in climate
+```{r MissingDataMean}
+    set.seed(1)    
+    m = 10
+    climate$DATE = as.Date(climate$DATE,tryFormats = c("%m-%d-%Y", "%m/%d/%Y"))
+    str(climate$DATE)
+    climate_amelia <- amelia(x = climate,idvars = c("SNWD"),ts ="DATE",m=m)
+    str(climate_amelia$imputations$imp1)
+  
+    climate_imputed <- climate
+  # Average the imputations between different simulated datasets
+    col_index = which(names(climate_amelia$imputations$imp1) %in% c("TAVG", "TMIN","TMAX","PRCP"))
+    for( col in col_index){
+      temp2=numeric() 
+      for (i in 1:m){
+        temp2 = cbind(temp2, climate_amelia$imputations[[i]][,col]) 
+        }
+      climate_imputed[,col] = apply(temp2, 1, mean) 
+    }
+  missmap(climate_imputed)
+  head(climate_imputed)
+  # Saving imputed Data
+  #saveRDS(climate_imputed,file = "climate_imputed.csv")
+  
+  #write.table(climate_imputed,'../data/kyoto_climate_imputed.csv' ,sep=",", col.names = c(names(climate_imputed)), row.names = FALSE)
+  #climate_imputed = read.table('../data/kyoto_climate_imputed.csv' ,sep=",", header=TRUE)
+  #climate_imputed$DATE = as.Date(climate_imputed$DATE )
+  #climate_imputed$doy = NULL
+  #str(climate_imputed)
+  
+```
+```{r}
+# Comebine two table and write to file. 
+# This step requires package dplyr 1.0.8
+
+  #climate_imputed$year <- as.Date(climate_imputed$DATE)
+  climate_imputed$year <- format(climate_imputed$DATE,"%Y")
+  climate_imputed$year = as.integer(climate_imputed$year)
+  blossom$bloom_date = as.Date(blossom$bloom_date)
+  bloom_test=blossom %>% right_join(climate_imputed,by="year")
+  bloom_test<-mutate(bloom_test,Status = case_when(
+    DATE>=bloom_date ~ 1,
+    DATE<bloom_date ~ 0
+    )) 
+  # CDD
+  bloom_test<-mutate(group_by(bloom_test,year), CDD=cumsum(TAVG))
+  write.table(bloom_test,'Kyoto.csv' ,sep=",", col.names = c(names(bloom_test)), row.names = FALSE)
+```
