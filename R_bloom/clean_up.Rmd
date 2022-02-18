@@ -1,0 +1,32 @@
+---
+title: "Further cleaning"
+output: html_notebook
+---
+Some further data cleaning commands to get an input for the machine learning algorithm
+
+Yday function is to covert the date to the doy
+```{r}
+climate_imputed<-read.table('../data/kyoto_climate_imputed.csv' ,sep=",", header=TRUE)
+climate_imputed$DATE = as.Date(climate_imputed$DATE )
+climate_imputed$doy = yday(climate_imputed$DATE)
+str(climate_imputed)
+
+```
+
+Read the bloom data and combine it with the weather data
+Here you can have a look at the data and make sure remove all the redundant information and the NA value to minumize the data size.
+This function is used to detect the na is.na part
+test <- c(1,2,3,NA) is.na(test)
+This function is to use remove the na
+ompleterecords <- na.omit(datacollected)
+
+```{r}
+bloom_result<-read.table('../data/kyoto.csv' ,sep=",", header=TRUE)
+bloom_result$bloom_date = as.Date(bloom_result$bloom_date)
+bloom_test=bloom_result %>% right_join(climate_imputed,by="year")
+bloom_test<-mutate(bloom_test,Status = case_when(
+    DATE>=bloom_date ~ 1,
+    DATE<bloom_date ~ 0
+    )) 
+#bloom_test$Status# = as.numeric(bloom_result$Status)
+```

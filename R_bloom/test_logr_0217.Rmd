@@ -6,13 +6,14 @@ Load library
 ```{r}
 library(tidyverse)
 library(timetk)
+library(lubridate)
 ```
 
 Load data cleaned by Lezheng Fang
 ```{r}
-climate_imputed<-read.table('../data/kyoto_climate_imputed.txt' ,sep=",", header=TRUE)
+climate_imputed<-read.table('../data/kyoto_climate_imputed.csv' ,sep=",", header=TRUE)
 climate_imputed$DATE = as.Date(climate_imputed$DATE )
-climate_imputed$doy = NULL
+climate_imputed$doy = yday(climate_imputed$DATE)
 str(climate_imputed)
 ```
 Remove the redundant year column
@@ -35,11 +36,6 @@ bloom_test<-mutate(bloom_test,Status = case_when(
     DATE>=bloom_date ~ 1,
     DATE<bloom_date ~ 0
     )) 
-bloom_test%>%filter(DATE >= as.Date('2019-01-01') & DATE <= as.Date('2022-01-01')) %>%
-    group_by(year) %>%
-    plot_time_series(
-        DATE, average_temperature,
-        .interactive = FALSE)
 #bloom_test$Status# = as.numeric(bloom_result$Status)
 ```
 
@@ -65,17 +61,7 @@ bloom_test<-mutate(group_by(bloom_test,year), CDD=cumsum(average_temperature))
 
 Quick Linear regression
 ```{r}
-bloom_test<-bloom_test %>% drop_na()
-bloom_test %>%filter(DATE >= as.Date('2019-01-01') & DATE <= as.Date('2022-01-01')) %>%
-    group_by(year) %>%
-    plot_time_series_regression(
-        .date_var     = DATE,
-        .formula      = as.numeric(Status) ~ as.numeric(average_temperature),
-        .facet_ncol   = 2,
-        .interactive  = FALSE,
-        .show_summary = FALSE
-    )
-```
+
 ```{r}
 l0<-glm(Status ~ CDD, family=binomial(link="logit"), data=bloom_test)
 summary(l0)
