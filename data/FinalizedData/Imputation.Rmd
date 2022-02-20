@@ -12,8 +12,8 @@ output:
 ```{r DataReading}
 library(Amelia)
 
-climate_name = "../SimplifiedData/Kyoto_climate.csv"
-blossom_name = "../SimplifiedData/Kyoto_blossom.csv"
+climate_name = "/SimplifiedData/Kyoto_climate.csv"
+blossom_name = "/SimplifiedData/Kyoto_blossom.csv"
 
 climate <- read.csv(climate_name)
 blossom <- read.csv(blossom_name)
