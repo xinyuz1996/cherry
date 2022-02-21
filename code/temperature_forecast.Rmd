@@ -1,4 +1,12 @@
-rm(list=ls())
+---
+title: "Tempature Forecasting via Time Series Analysis"
+author: "Xinyu Zhang"
+date: "2022/2/20"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 
 # time series forecasting
 # library(rworldmap) #???? may not be used
@@ -8,7 +16,11 @@ library(forecast) #auto.arima
 library(dplyr)
 library(fpp3) # time series models
 library(feasts)
+```
 
+ 
+
+```{r loadData}
 cherry <- read.csv("../data/FinalizedData/FinalData/DC.csv")
 # cherry <- read.csv("../data/washingtondc.csv") %>% 
 #   bind_rows(read.csv("../data/liestal.csv")) %>% 
@@ -20,13 +32,14 @@ date = (as.Date(as.character(cherry$DATE)))
 year = cherry$year
 data = data.frame(precip, temp, date, year)
 str(data)
-
-?ts()
-length(date)
 head(data,2)
 tail(data,2)
 data_year = data %>% filter(year==2000)
 
+```
+
+```{r plot, fig.width=8, fig.height=3, warning=FALSE, message=FALSE}
+par(mfrow=c(1,2))
 #### Step 1: Preview
 # Use ACF to identify the type of time series
 acf(ts(data_year$temp), lag.max = 100, col = 'dark blue', bg = 'dark blue', 
@@ -55,13 +68,21 @@ data_ts %>%
 #'  seasonal fluctuations, or the variation around the trend-cycle,
 #'   does not vary with the level of the time series.
 
+```
+
+
+
+```{r}
 #### Step 2 STL Decomposition
 dcmp <- data_ts %>% 
   model(stl = STL(temp ~ trend(window=7), robust=TRUE)) %>%
   components() %>%
   select(-.model)
-dcmp
+head(dcmp)
 
+```
+
+```{r}
 #### Step 3 Forecasting
 h = 30
 fcst = dcmp %>%
@@ -78,14 +99,10 @@ temprature_fcst = fcst$.mean
 date.f = seq(from=tail(data$date,1), to=tail(data$date,1)+h, length.out=h)
 data.forecast = data.frame(temp=temprature_fcst, date=date.f)
 data_total = rbind(data[,c('temp','date')],data.forecast)
-str(data_total)
+str(data.forecast)
 
-write.csv(data_total,"../data/temp_forecast.csv")
-
-
+write.csv(data.forecast,"../data/temp_forecast.csv")
 
 
-
-
-
+```
 
