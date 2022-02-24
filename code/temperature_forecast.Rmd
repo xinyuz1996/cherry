@@ -16,12 +16,14 @@ library(forecast) #auto.arima
 library(dplyr)
 library(fpp3) # time series models
 library(feasts)
+library(ggplot2)
+library(fable)
 ```
 
  
 
 ```{r loadData}
-cherry <- read.csv("../data/FinalizedData/FinalData/DC.csv")
+cherry <- read.csv("../data/FinalizedData/FinalData/Kyoto.csv")
 # cherry <- read.csv("../data/washingtondc.csv") %>% 
 #   bind_rows(read.csv("../data/liestal.csv")) %>% 
 #   bind_rows(read.csv("../data/kyoto.csv"))
@@ -84,8 +86,12 @@ head(dcmp)
 
 ```{r}
 #### Step 3 Forecasting
+<<<<<<< HEAD
 # h is forecasting horizon since the end of the data
 h = 100
+=======
+h = 3740
+>>>>>>> 31b9cf4048adbf85024dfa37c63ee6dd48ad9153
 fcst = dcmp %>%
   model(SNAIVE(temp~lag("year"))) %>%
   forecast(h=h)
@@ -102,8 +108,9 @@ data.forecast = data.frame(temp=temprature_fcst, date=date.f)
 data_total = rbind(data[,c('temp','date')],data.forecast)
 str(data.forecast)
 
-write.csv(data.forecast,"../data/temp_forecast.csv")
+write.csv(data.forecast,"../data/FinalizedData/FinalData/Liestal_temp_forecast_10_years.csv")
 
+summary(data.forecast)
 
 ```
 
