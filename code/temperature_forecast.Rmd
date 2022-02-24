@@ -84,7 +84,8 @@ head(dcmp)
 
 ```{r}
 #### Step 3 Forecasting
-h = 30
+# h is forecasting horizon since the end of the data
+h = 100
 fcst = dcmp %>%
   model(SNAIVE(temp~lag("year"))) %>%
   forecast(h=h)
