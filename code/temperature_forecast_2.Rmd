@@ -23,20 +23,22 @@ library(fable)
  
 
 ```{r loadData}
-cherry <- read.csv("../data/FinalizedData/FinalData/Kyoto_filled.csv")
-# cherry <- read.csv("../data/washingtondc.csv") %>% 
-#   bind_rows(read.csv("../data/liestal.csv")) %>% 
-#   bind_rows(read.csv("../data/kyoto.csv"))
+cherry <- read.csv("../data/FinalizedData/FinalData/Liestal.csv")
+
 str(cherry)
-precip = cherry$PRCP
-temp = cherry$TAVG
-date = (as.Date(as.character(cherry$DATE)))
-year = cherry$year
+first_date = as.Date(cherry$DATE[1])
+target_date = as.Date("1999-12-31")
+train_range = seq(first_date, target_date, by="days")
+
+precip = cherry$PRCP[1:length(train_range)]
+temp = cherry$TAVG[1:length(train_range)]
+date = (as.Date(as.character(cherry$DATE)))[1:length(train_range)]
+year = cherry$year[1:length(train_range)]
 data = data.frame(precip, temp, date, year)
 str(data)
 head(data,2)
 tail(data,2)
-data_year = data %>% filter(year==2000)
+data_year = data %>% filter(year==1999)
 
 ```
 
@@ -86,7 +88,9 @@ head(dcmp)
 
 ```{r}
 #### Step 3 Forecasting
-h = 3740
+target_date2 = as.Date("2021-12-31")
+prediction_range = seq(target_date+1, target_date2, by="days")
+h = length(prediction_range)
 fcst = dcmp %>%
   model(SNAIVE(temp~lag("year"))) %>%
   forecast(h=h)
@@ -95,15 +99,26 @@ fcst %>% autoplot(dcmp) +
   labs(y = "Temperature",
        title = "TS Forecast of Temperature")
 
-temprature_fcst = fcst$.mean
+temperature_fcst = fcst$.mean
+date.f = seq(from=tail(data$date,1)+1, to=tail(data$date,1)+h, length.out=h)
 
 
-date.f = seq(from=tail(data$date,1), to=tail(data$date,1)+h, length.out=h)
-data.forecast = data.frame(temp=temprature_fcst, date=date.f)
-data_total = rbind(data[,c('temp','date')],data.forecast)
+cumsum = temperature_fcst[1]
+CDD_vector = temperature_fcst;
+for (i in 2:length(date.f)) {
+  if (as.integer(format(date.f[i],"%Y")) > as.integer(format(date.f[i-1],"%Y"))) {
+    cumsum = 0
+  }
+  CDD_vector[i] = cumsum + temperature_fcst[i]
+  cumsum = CDD_vector[i]
+}
+
+data.forecast = data.frame(temp=temperature_fcst, date=date.f,CDD = CDD_vector)
+#data_total = rbind(data[,c('temp','date')],data.forecast)
 str(data.forecast)
 
-write.csv(data.forecast,"../data/FinalizedData/FinalData/Kyoto_temp_forecast_10_years.csv")
+
+write.csv(data.forecast,"../data/FinalizedData/FinalData/Liestal_temp_forecast_2000_2021.csv")
 
 summary(data.forecast)
 
