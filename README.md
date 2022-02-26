@@ -6,7 +6,7 @@ This is the Github repository for the cherry blossom peak bloom competition in 2
 * [Xinyu Zhang](https://www.linkedin.com/in/xinyuzhangncsu/) - (xinyu_zhang@ncsu.edu) 
   > Ph.D. Candidate in Statistics at North Carolina State University.  
   > Team Lead, Statistical Modeling, and Time Series Forecasting.
-* [Yuxin Wang](https://www.linkedin.com/in/yuxin-wang-219b41152/) - (yuxinw0205@gmail.com)
+* [Yuxin Wang](https://www.linkedin.com/in/yuxin-wang-b22577158/) - (yuxinw0205@gmail.com)
   > Ph.D. in University of Chicago.
   > Realization of Machine Learning Algorithms in Python and R. 
 * [Lezheng Fang](https://www.linkedin.com/in/lezhengfang/) - (lezheng.fang@gatech.edu)
@@ -35,5 +35,6 @@ Descripiton of the folder and files.
 
 ## Project Overview
 
+In this project, we 
 
 ![alt text](https://github.com/xinyuz1996/cherry/blob/main/figures/cherry1.jpg)
