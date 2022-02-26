@@ -7,6 +7,7 @@ This is the Github repository for the cherry blossom peak bloom competition in 2
   > Ph.D. Candidate in Statistics at North Carolina State University.  
   > Team Lead, Statistical Modeling, and Time Series Forecasting.
 * [Yuxin Wang](https://www.linkedin.com/in/yuxin-wang-219b41152/) - (yuxinw0205@gmail.com)
+  > Ph.D. in University of Chicago.
   > Realization of Machine Learning Algorithms in Python and R. 
 * [Lezheng Fang](https://www.linkedin.com/in/lezhengfang/) - (lezheng.fang@gatech.edu)
   > Ph.D. Candidate in Mechanical Engineering at Georgia Institute of Technology.  
@@ -21,6 +22,18 @@ High school classmates with diverse backgrounds but common interests in this che
 We are a group of people who enjoy data science and love applying our knowledge to real-life scenarios. We hope that our work could provide more insights or inspirations to the area of statistical phenological study.
 
 
-## TL:DR  
-## Project introduction
-## Beautiful flowers
+## Project Website
+
+Please see our website for the details of this project:
+
+https://github.com/xinyuz1996/cherry/
+
+Descripiton of the folder and files. 
+
+* Code folder stores the code we used for analysis
+* Figure :
+
+## Project Overview
+
+
+![alt text](https://github.com/xinyuz1996/cherry/blob/main/figures/cherry1.jpg)
