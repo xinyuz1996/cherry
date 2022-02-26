@@ -3,15 +3,15 @@ This is the Github repository for the cherry blossom peak bloom competition in 2
 
 ## Group Members: 💎 NK 💎
 
-* Xinyu Zhang - (xinyu_zhang@ncsu.edu) 
+* [Xinyu Zhang](https://www.linkedin.com/in/xinyuzhangncsu/) - (xinyu_zhang@ncsu.edu) 
   > Ph.D. Candidate in Statistics at North Carolina State University.  
   > Team Lead, Statistical Modeling, and Time Series Forecasting.
-* Yuxin Wang - (yuxinw0205@gmail.com)
+* [Yuxin Wang](https://www.linkedin.com/in/yuxin-wang-219b41152/) - (yuxinw0205@gmail.com)
   > Realization of Machine Learning Algorithms in Python and R. 
-* Lezheng Fang - (lezheng.fang@gatech.edu)
+* [Lezheng Fang](https://www.linkedin.com/in/lezhengfang/) - (lezheng.fang@gatech.edu)
   > Ph.D. Candidate in Mechanical Engineering at Georgia Institute of Technology.  
   > Exploratory Analysis and Missing Data Imputation in R.
-* Feng Yu - (fyu9@ucmerced.edu) 
+* [Feng Yu](https://www.linkedin.com/in/feng-yu-631731220/) - (fyu9@ucmerced.edu) 
   > Ph.D. Candidate in Quantitative and Systems Biology Program at University of California, Merced.        
   > Data Colloction, Biological Model Improvement, and Narrative Writing.
   
