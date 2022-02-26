@@ -1,11 +1,8 @@
 # Cherry Blossom Peak Bloom Prediction
 This is the Github repository for the cherry blossom peak bloom competition in 2022.
 
-## Group
-**Group Name:** 
-💎 NK 💎
-
-**Group Members:**
+## Group 💎 NK 💎
+**Group Members**
 
 * Xinyu Zhang - (xinyu_zhang@ncsu.edu) 
   > Ph.D. Candidate in Statistics at North Carolina State University.  
@@ -18,12 +15,12 @@ This is the Github repository for the cherry blossom peak bloom competition in 2
 * Feng Yu - (fyu9@ucmerced.edu) 
   > Ph.D. Candidate in Quantitative and Systems Biology Program at University of California, Merced. 
   > Data Colloction, Biological Model Improvement, and Narrative Writing.
-   
-
   
-## Who we are
+**Who we are**
 We are high school classmate with diversity background. We love data science and programming. More importantly, we care about  
-our earth. We want to use our knowledge and skill to raise awareness of climate change and environmental protection.  
+our earth. We want to use our knowledge and skill to raise awareness of climate change and environmental protection. 
+
+
 ## TL:DR  
 ## Project introduction
 ## Beautiful flowers
