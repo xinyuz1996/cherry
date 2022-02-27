@@ -23,15 +23,16 @@ library(fable)
  
 
 ```{r loadData}
-cherry <- read.csv("../data/FinalizedData/FinalData/Kyoto_filled.csv")
+cherry <- read.csv("../data/FinalizedData/FinalData/Vancouver_climate.csv")
 # cherry <- read.csv("../data/washingtondc.csv") %>% 
 #   bind_rows(read.csv("../data/liestal.csv")) %>% 
 #   bind_rows(read.csv("../data/kyoto.csv"))
 str(cherry)
 precip = cherry$PRCP
 temp = cherry$TAVG
-date = (as.Date(as.character(cherry$DATE)))
-year = cherry$year
+date = as.Date(cherry$DATE)
+#date = (as.Date(as.character(cherry$DATE)))
+year = format(as.Date(cherry$DATE),"%Y")
 data = data.frame(precip, temp, date, year)
 str(data)
 head(data,2)
@@ -103,7 +104,7 @@ data.forecast = data.frame(temp=temprature_fcst, date=date.f)
 data_total = rbind(data[,c('temp','date')],data.forecast)
 str(data.forecast)
 
-write.csv(data.forecast,"../data/FinalizedData/FinalData/Kyoto_temp_forecast_10_years.csv")
+write.csv(data.forecast,"../data/FinalizedData/FinalData/Vancouver_temp_forecast_10_years.csv")
 
 summary(data.forecast)
 
