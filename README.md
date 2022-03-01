@@ -18,7 +18,7 @@ This is the Github repository for the cherry blossom peak bloom competition in 2
   
 ## Who we are:
 
-High school classmates with diverse backgrounds but common interests in this cherry tree peak bloom competition. We share our different knowledge and skills to promote a better statistical phenological cherry peak bloom prediction model considering both theoretical biology insights and robust practical algorithms.
+High school classmates with diverse backgrounds but common interests in this cherry tree peak bloom competition. We share our different knowledge and skills to promote a better statistical phenological cherry peak bloom prediction model considering both theoretical biology insights and robust data-driven empirical algorithms.
 We are a group of people who enjoy data science and love applying our knowledge to real-life scenarios. We hope that our work could provide more insights or inspirations to the area of statistical phenological study.
 
 
