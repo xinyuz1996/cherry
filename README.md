@@ -14,7 +14,7 @@ This is the Github repository for the cherry blossom peak bloom competition in 2
   > Exploratory Analysis and Missing Data Imputation in R.
 * [Feng Yu](https://www.linkedin.com/in/feng-yu-631731220/) - (fyu9@ucmerced.edu) 
   > Ph.D. Candidate in Quantitative and Systems Biology Program at University of California, Merced.        
-  > Data Colloction, Biological Model Improvement, and Narrative Writing.
+  > Data Collection, Biological Model Improvement, and Narrative Writing.
   
 ## Who we are:
 
@@ -31,10 +31,11 @@ https://github.com/xinyuz1996/cherry/
 Descripiton of the folder and files. 
 
 * Code folder stores the code we used for analysis
-* Figure :
-
-## Project Overview
-
-In this project, we 
+* Required data for trainning and prediction is also stored in the same folder
+* Source Code for each figure
+* Figure 1 : DC_temp_doy_plots.ipynb
+* Figure 2 : washington_train.ipynb
+* Figure 3 : washington_train.ipynb
+* Figure 4 : Liestal_predict.ipynb washington_predict.ipynb vancouver_train.ipynb kyoto_predict.ipynb
 
 ![alt text](https://github.com/xinyuz1996/cherry/blob/main/figures/cherry1.jpg)
