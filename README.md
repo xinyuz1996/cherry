@@ -7,7 +7,7 @@ This is the Github repository for the cherry blossom peak bloom competition in 2
   > Ph.D. Candidate in Statistics at North Carolina State University.  
   > Team Lead, Statistical Modeling, and Time Series Forecasting.
 * [Yuxin Wang](https://www.linkedin.com/in/yuxin-wang-b22577158/) - (yuxinwang2023@u.northwestern.edu)
-  > Ph.D. Candidate in Physics at Northwestern University.
+  > Ph.D. Candidate in Physics at Northwestern University.  
   > Realization of Machine Learning Algorithms in Python and R. 
 * [Lezheng Fang](https://www.linkedin.com/in/lezhengfang/) - (lezheng.fang@gatech.edu)
   > Ph.D. Candidate in Mechanical Engineering at Georgia Institute of Technology.  
