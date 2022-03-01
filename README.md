@@ -28,7 +28,7 @@ Please see our website for the details of this project:
 
 https://github.com/xinyuz1996/cherry/
 
-Descripiton of the folder and files. 
+Descripiton of the folder and files:
 
 * Code folder stores the code we used for analysis
 * Required data for trainning and prediction is also stored in the same folder
