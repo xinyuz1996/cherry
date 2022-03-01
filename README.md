@@ -36,6 +36,6 @@ Descripiton of the folder and files.
 * Figure 1 : DC_temp_doy_plots.ipynb
 * Figure 2 : washington_train.ipynb
 * Figure 3 : washington_train.ipynb
-* Figure 4 : Liestal_predict.ipynb washington_predict.ipynb vancouver_train.ipynb kyoto_predict.ipynb
+* Figure 4 : Liestal_predict.ipynb, washington_predict.ipynb, vancouver_train.ipynb, kyoto_predict.ipynb
 
 ![alt text](https://github.com/xinyuz1996/cherry/blob/main/figures/cherry1.jpg)
